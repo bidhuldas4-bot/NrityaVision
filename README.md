@@ -1,53 +1,332 @@
 # NrityaVision AI
-Intelligent Kuchipudi hand-mudra recognition and performance evaluation (Python, OpenCV, MediaPipe, scikit-learn, DTW, Tkinter, SQLite, Matplotlib, ReportLab).
 
-## 1. Install (Windows)
-1. Install **64-bit Python 3.10, 3.11 or 3.12** from python.org (tick "Add python.exe to PATH" and keep tcl/tk).
-2. Open this folder in VS Code (or CMD) and run **`setup_windows.bat`** - it creates `.venv`, installs `requirements.txt` and runs the self-test.
-   Manual alternative:
-   ```
-   python -m venv .venv
-   .venv\Scripts\activate
-   python -m pip install --upgrade pip
-   pip install -r requirements.txt
-   python tools\selftest.py
-   ```
-3. Start: **`run.bat`** or `.venv\Scripts\python.exe main.py`.
+## AI-Powered Kuchipudi Mudra Recognition and Performance Evaluation
 
-## 2. First-time workflow (the model starts EMPTY - nothing is pre-trained)
-No public labelled Kuchipudi mudra dataset ships with this project, so you must create one:
-1. **Reference Mudra Library > Dataset & Training**: select a mudra, press **Capture from webcam** (3 s countdown, then samples are taken automatically; slowly turn/tilt the hand and vary distance). Or import images / a folder of images / a video clip.
-2. Repeat for all five mudras, ideally in **several separate sessions** (different days, lighting, people, left and right hand). Aim for 100+ samples per mudra, minimum 10.
-3. Press **Train model**. Three model families are compared by cross-validation, the best is kept. Validation is grouped by capture session when possible; if the log says *optimistic*, record more sessions.
-4. Have your guru check the reference images - similarity can only be as correct as the references.
-5. Use **Live Camera**, **Upload Image**, **Upload Dance Video**; reports are in **Performance Reports** (PDF/CSV export).
+NrityaVision is an AI-powered classical dance Mudra recognition and analysis system designed to help dancers learn, practice, and improve their hand gestures. It uses Python, OpenCV, MediaPipe, and Machine Learning to detect and evaluate hand Mudras through webcam input, uploaded images, and dance videos.
 
-## 3. How results are computed (no random numbers)
-* MediaPipe gives 21 landmarks per hand. They are centred on the wrist, scaled by palm size, left hands mirrored, then converted to rotation-invariant features (joint angles, fingertip distances, finger spread, palm orientation).
-* **Confidence** = classifier probability. A hand is reported as **"Unable to recognize"** when it is hidden, cut off, blurry, too dark/bright, too small, the confidence or margin is low, or the shape is unlike every trained mudra. Frames with more than two hands (several dancers) are skipped by default.
-* **Similarity (0-100)** = geometric closeness to the mean of your labelled reference samples with per-feature tolerance (formula in `nrityavision/similarity.py`). Confidence is never shown as correctness.
-* Status: similarity >= 75 Correct, 55-75 Needs improvement, < 55 Incorrect (changeable in Settings). Wrong or missed mudra scores 0. **Overall accuracy = mean item score.**
-* Video: sampled at ~10 fps -> per-frame recognition -> 5-frame majority smoothing -> segments (holds shorter than 0.4 s are transitions) -> evaluation. With an **expected sequence** (typed or a reference video) segments are aligned with **DTW**; skipped/extra mudras are flagged. With a **reference video**, hand-shape trajectories are also compared by DTW (movement similarity + deviation timestamps, speed differences ignored).
+Users can upload reference Mudra images, collect custom training data, train recognition models, and evaluate the accuracy of their hand gestures. The system also supports dance video analysis to identify Mudras and provide performance feedback.
 
-## 4. Troubleshooting
-| Problem | Fix |
+**Technologies:** Python, OpenCV, MediaPipe, Scikit-learn, DTW, Tkinter, SQLite, NumPy, Matplotlib, ReportLab.
+
+---
+
+## 1. Key Features
+
+- Real-Time Mudra Detection using a webcam.
+- Upload and analyze hand gesture images.
+- Custom Mudra dataset collection and model training.
+- Pataka Mudra training and evaluation.
+- Dance video analysis.
+- Mudra recognition and similarity scoring.
+- Performance report generation in PDF and CSV formats.
+- Reference Mudra Library.
+- Database management using SQLite.
+
+---
+
+## 2. Installation (Windows)
+
+### Requirements
+
+- Windows 10 or Windows 11.
+- 64-bit Python 3.10, 3.11, or 3.12.
+- Visual Studio Code.
+- Webcam for real-time detection.
+
+### Installation Steps
+
+1. Download Python from https://www.python.org/downloads/.
+2. Enable **Add Python to PATH** during installation.
+3. Open the NrityaVision project folder in VS Code.
+4. Open the VS Code terminal.
+5. Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+6. Activate the environment:
+
+```powershell
+.venv\Scripts\activate
+```
+
+7. Upgrade pip:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+8. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+9. Run the self-test:
+
+```bash
+python tools/selftest.py
+```
+
+### Start the Application
+
+```bash
+python main.py
+```
+
+Alternatively, run:
+
+```bash
+run.bat
+```
+
+---
+
+## 3. Mudra Dataset Collection and Model Training
+
+The recognition model starts empty. Users must collect and label their own Mudra training data.
+
+### Step 1: Open Dataset & Training
+
+Navigate to:
+
+**Reference Mudra Library → Dataset & Training**
+
+### Step 2: Collect Training Images
+
+Users can collect training samples using:
+
+- Webcam capture.
+- Individual image uploads.
+- Folder-based image imports.
+- Video clip imports.
+
+### Step 3: Organize the Dataset
+
+Example dataset structure:
+
+```text
+dataset/
+│
+├── Pataka/
+│   ├── image1.jpg
+│   ├── image2.jpg
+│   └── image3.jpg
+│
+├── Tripataka/
+│   ├── image1.jpg
+│   └── image2.jpg
+│
+└── Mayura/
+    ├── image1.jpg
+    └── image2.jpg
+```
+
+Collect samples with different hand angles, lighting conditions, distances, and backgrounds.
+
+Aim for 100 or more samples per Mudra where possible. A minimum of 10 samples can be used for initial experimentation, but more data is needed for reliable recognition.
+
+### Step 4: Train the Model
+
+1. Open Dataset & Training.
+2. Select the Mudra dataset.
+3. Click **Train Model**.
+4. Wait for training and validation.
+5. Review the evaluation results.
+
+### Step 5: Test the Model
+
+Test the trained model using:
+
+- Live Camera.
+- Upload Image.
+- Upload Dance Video.
+
+---
+
+## 4. How Mudra Recognition Works
+
+NrityaVision uses MediaPipe Hands to detect 21 hand landmarks.
+
+The recognition process includes:
+
+1. Hand Detection.
+2. Hand Landmark Extraction.
+3. Feature Extraction and Normalization.
+4. Machine Learning Classification.
+5. Mudra Similarity Calculation.
+6. Accuracy Evaluation.
+7. Performance Report Generation.
+
+### Accuracy Evaluation
+
+The system compares detected hand positions with labelled reference samples.
+
+Similarity scores are measured from 0 to 100.
+
+| Similarity Score | Result |
 |---|---|
-| `import cv2` fails / numpy 2 error | Do **not** install `opencv-python` next to MediaPipe: `pip uninstall -y opencv-python opencv-contrib-python` then `pip install -r requirements.txt` |
-| `module 'mediapipe' has no attribute 'solutions'` | Newer MediaPipe removed the legacy API: `pip install mediapipe==0.10.14` |
-| No matching distribution for mediapipe | Use 64-bit Python 3.10-3.12 |
-| Camera does not open / black | Close Zoom/Teams, Windows Settings > Privacy > Camera, change *Camera index* in Settings |
-| Many "blurry" / "too dark" rejections | Better light, steadier camera, or lower *Blur threshold* / *Minimum brightness* in Settings |
-| Left/right hands swapped in uploaded media | Toggle *Uploads are mirrored* in Settings |
-| Video will not open | Convert to H.264 MP4 (HandBrake/VLC) |
-| Everything "Unable to recognize" | Model not trained or too few/varied samples; lower *Minimum confidence* only after collecting more data |
-| Error details | `data/logs/app.log` |
+| 75–100 | Correct |
+| 55–74 | Needs Improvement |
+| Below 55 | Incorrect |
 
-## 5. Limitations
-* Accuracy depends entirely on the labelled data you collect; check the cross-validation report before trusting results.
-* Similar mudras (e.g. Tripataka vs Mayura) need many varied samples. 2D webcam landmarks have depth ambiguity; a side-on hand can be unreliable.
-* Descriptions of mudras vary between schools; the app compares with *your* references. It supports learning, it does not replace a teacher.
-* Only hand mudras are analysed (no body/face/rhythm yet).
+These thresholds can be adjusted in Settings.
 
-## 6. Layout
-`main.py` entry | `nrityavision/` core (`features`, `hand_tracker`, `classifier`, `similarity`, `dtw`, `analyzer`, `report`, `database`) and `ui/` pages | `tools/selftest.py` | `data/` (SQLite DB, reference media, reports, logs) | `models/` trained model.
-Add the other Asamyuta Hastas via *Add all 28 Asamyuta Hastas*, then collect samples and retrain - no code changes needed.
+The system may display **Unable to Recognize** when the hand is hidden, blurry, too small, or poorly detected.
+
+Classification confidence and geometric similarity are separate measurements.
+
+---
+
+## 5. Dance Video Analysis
+
+NrityaVision supports uploaded dance video analysis.
+
+The video analysis process includes:
+
+1. Upload a dance video.
+2. Extract frames from the video.
+3. Detect hand landmarks.
+4. Recognize Mudras in individual frames.
+5. Smooth recognition results across frames.
+6. Identify Mudra sequences.
+7. Evaluate gesture accuracy.
+8. Generate a performance report.
+
+When an expected Mudra sequence or reference video is provided, Dynamic Time Warping (DTW) can be used to compare sequences and movement patterns.
+
+---
+
+## 6. Supported Mudras
+
+The system supports custom Mudra training.
+
+Users can start with Pataka Mudra and gradually add other Indian classical dance Mudras.
+
+Additional Mudras require labelled training samples before reliable recognition is possible.
+
+The project also includes an option to add all 28 Asamyuta Hastas through the Reference Mudra Library, if enabled in the application.
+
+---
+
+## 7. Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| Python | Main programming language |
+| OpenCV | Image and video processing |
+| MediaPipe | Hand landmark detection |
+| Scikit-learn | Machine Learning |
+| NumPy | Numerical calculations |
+| DTW | Sequence comparison |
+| Tkinter | Desktop user interface |
+| SQLite | Database management |
+| Matplotlib | Data visualization |
+| ReportLab | PDF report generation |
+
+---
+
+## 8. Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Python package installation error | Check Python version and install dependencies again. |
+| MediaPipe installation error | Use compatible 64-bit Python 3.10–3.12. |
+| Camera does not open | Check camera permissions and close other applications using the camera. |
+| Black camera screen | Check the camera index in Settings. |
+| Model cannot recognize Mudras | Collect more varied training samples and retrain. |
+| Poor recognition accuracy | Improve dataset quality and collect more samples. |
+| Video cannot open | Convert the video to H.264 MP4 format. |
+| Application startup error | Check data/logs/app.log for error details. |
+
+---
+
+## 9. Project Structure
+
+```text
+NrityaVision/
+│
+├── main.py
+├── requirements.txt
+├── README.md
+├── setup_windows.bat
+├── run.bat
+│
+├── nrityavision/
+│   ├── features/
+│   ├── hand_tracker/
+│   ├── classifier/
+│   ├── similarity/
+│   ├── dtw/
+│   ├── analyzer/
+│   ├── report/
+│   └── database/
+│
+├── ui/
+│
+├── tools/
+│   └── selftest.py
+│
+├── data/
+│   ├── reference_media/
+│   ├── reports/
+│   └── logs/
+│
+└── models/
+```
+
+The actual folder structure may vary depending on the project version.
+
+---
+
+## 10. Limitations
+
+- Recognition accuracy depends on the quality and quantity of training data.
+- Similar Mudras may require more training samples.
+- Webcam-based 2D hand detection can have depth and orientation limitations.
+- Different dance schools may follow different Mudra variations.
+- The application focuses on hand Mudra recognition, not complete body posture, facial expressions, or rhythm analysis.
+- AI-generated evaluations are intended as learning assistance and do not replace guidance from a qualified dance teacher.
+
+---
+
+## 11. Future Enhancements
+
+- Support for more Indian classical dance Mudras.
+- Improved real-time Mudra recognition.
+- Advanced hand movement analysis.
+- Better dance video performance evaluation.
+- Improved AI-based feedback.
+- Mobile application support.
+- More accurate reference-based dance evaluation.
+
+---
+
+## 12. Project Information
+
+**Project Name:** NrityaVision AI
+
+**Domain:** Artificial Intelligence and Machine Learning
+
+**Project Type:** AI-Based Classical Dance Gesture Recognition and Analysis
+
+**Programming Language:** Python
+
+**Platform:** Windows Desktop Application
+
+---
+
+## 13. Author
+
+**Developed By:** Bidhul Das
+
+---
+
+## 14. License
+
+This project is developed for educational and learning purposes. A suitable open-source license can be added if the project is distributed publicly.
+
+---
+
+**NrityaVision AI – Bringing Artificial Intelligence into Indian Classical Dance.**
