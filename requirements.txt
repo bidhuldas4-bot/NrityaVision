@@ -1,0 +1,10 @@
+# NrityaVision AI - tested combination (Python 3.10, 3.11 or 3.12, 64-bit)
+# NOTE: do NOT also install "opencv-python"; MediaPipe already pulls in opencv-contrib-python
+# and having both packages installed breaks "import cv2".
+numpy==1.26.4
+opencv-contrib-python==4.9.0.80
+mediapipe==0.10.14
+scikit-learn==1.4.2
+matplotlib==3.8.4
+Pillow==10.3.0
+reportlab==4.1.0

@@ -1,0 +1,15 @@
+2026-11-01 19:44:57,727 ERROR nrityavision: background task failed
+Traceback (most recent call last):
+  File "C:\Users\User\OneDrive\Microsoft Copilot Chat Files\Documents\NrityaVision\nrityavision\ui\widgets.py", line 172, in runner
+    q.put(("done", work(lambda f, t="": q.put(("p", f, t)), cancel), None))
+                   ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\OneDrive\Microsoft Copilot Chat Files\Documents\NrityaVision\nrityavision\ui\page_image.py", line 82, in work
+    return an.analyze(self.path, exp)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\User\OneDrive\Microsoft Copilot Chat Files\Documents\NrityaVision\nrityavision\analyzer.py", line 560, in analyze
+    tr = HandTracker(True, 2, conf, S["track_conf"], S["model_complexity"], S)
+  File "C:\Users\User\OneDrive\Microsoft Copilot Chat Files\Documents\NrityaVision\nrityavision\hand_tracker.py", line 41, in __init__
+    raise RuntimeError(
+    ...<3 lines>...
+    )
+RuntimeError: MediaPipe could not be imported. Install the tested version with 'pip install mediapipe==0.10.14' (Python 3.10-3.12). Original error: module 'mediapipe' has no attribute 'solutions'
